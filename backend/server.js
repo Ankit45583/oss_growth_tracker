@@ -29,8 +29,6 @@ app.use(
   })
 );
 
-// 👇 ye zaroor hona chahiye
-app.options("*", cors());
 
 // ─── Routes ──────────────────────────────────────────────────
 const authRoutes        = require("./routes/authRoutes");
