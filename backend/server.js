@@ -19,15 +19,18 @@ app.use(express.urlencoded({ extended: true }));
 app.use(
   cors({
     origin: [
-      process.env.CLIENT_URL,
-      "http://localhost:5173",
-      "http://localhost:3000",
+      "https://oss-growth-tracker.vercel.app", // ✅ production
+      "http://localhost:5173",                 // local
+      "http://localhost:3000"
     ],
     credentials: true,
-    methods:     ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
   })
 );
+
+// ✅ Preflight fix (important)
+app.options("*", cors());
 
 // ─── Routes ──────────────────────────────────────────────────
 const authRoutes        = require("./routes/authRoutes");
