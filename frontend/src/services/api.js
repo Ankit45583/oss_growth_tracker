@@ -71,7 +71,7 @@ export const authService = {
     return response.data;
   },
 
-  // Existing GitHub login
+  // GitHub login
   loginWithGithub: () => {
     window.location.assign(`${BASE}/auth/github`);
   },
@@ -99,10 +99,10 @@ export const userService = {
     return response.data;
   },
 
-  connectGithub: async () => {
-  const response = await api.get("/auth/github/connect");
-  return response.data;
-},  
+  // ✅ FIXED - Direct browser redirect, no AJAX
+  connectGithub: () => {
+    window.location.href = `${BASE}/auth/github/connect`;
+  },
 };
 
 // REPO SERVICES

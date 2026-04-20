@@ -68,22 +68,10 @@ const DashboardPage = () => {
     }
   }, [updateUser, user]);
 
-  const handleConnectGithub = async () => {
+  // ✅ FIXED - Simple function, no async, no try/catch
+  const handleConnectGithub = () => {
     setConnecting(true);
-    setErr("");
-
-    try {
-      const res = await userService.connectGithub();
-      if (res.url) {
-        window.location.href = res.url;
-        return;
-      }
-      setErr("GitHub connection URL not received.");
-    } catch (e) {
-      setErr(e.response?.data?.message || "Failed to connect GitHub.");
-      setConnecting(false);
-      clearMsgs();
-    }
+    userService.connectGithub(); // Direct browser redirect
   };
 
   const fmtDate = (d) => {
@@ -139,56 +127,50 @@ const DashboardPage = () => {
       {/* Top bar */}
       <div className="dash-topbar">
         <div>
-    <h1 className="dash-page-title">Dashboard</h1>
-    <p className="text-muted">Your open source contribution overview</p>
-  </div>
+          <h1 className="dash-page-title">Dashboard</h1>
+          <p className="text-muted">Your open source contribution overview</p>
+        </div>
 
-  <div style={{ display: "flex", gap: 12, alignItems: "center" }}>
-    {/* ✅ Share Card Button */}
-    {ghConnected && (
-      <ShareCard username={user.githubUsername || user.username} />
-    )}
+        <div style={{ display: "flex", gap: 12, alignItems: "center" }}>
+          {/* Share Card Button */}
+          {ghConnected && (
+            <ShareCard username={user.githubUsername || user.username} />
+          )}
 
-    {/* Existing Refresh Button */}
-    {ghConnected && (
-      <button onClick={handleRefresh} disabled={refreshing} className="btn-primary">
-        ...
-      </button>
-    )}
-  </div>
-
-        {ghConnected && (
-          <button
-            onClick={handleRefresh}
-            disabled={refreshing}
-            className="btn-primary"
-          >
-            {refreshing ? (
-              <>
-                <div className="dash-btn-spinner" />
-                Refreshing...
-              </>
-            ) : (
-              <>
-                <svg
-                  width="15"
-                  height="15"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                  strokeWidth={2}
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
-                  />
-                </svg>
-                Refresh Data
-              </>
-            )}
-          </button>
-        )}
+          {/* Refresh Button */}
+          {ghConnected && (
+            <button
+              onClick={handleRefresh}
+              disabled={refreshing}
+              className="btn-primary"
+            >
+              {refreshing ? (
+                <>
+                  <div className="dash-btn-spinner" />
+                  Refreshing...
+                </>
+              ) : (
+                <>
+                  <svg
+                    width="15"
+                    height="15"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                    strokeWidth={2}
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+                    />
+                  </svg>
+                  Refresh Data
+                </>
+              )}
+            </button>
+          )}
+        </div>
       </div>
 
       {/* Messages */}
@@ -249,8 +231,8 @@ const DashboardPage = () => {
             <div>
               <h3 className="dash-github-title">GitHub Not Connected</h3>
               <p className="dash-github-desc">
-                Connect your GitHub account to track repositories, commits, streaks,
-                badges, and compete on the leaderboard.
+                Connect your GitHub account to track repositories, commits,
+                streaks, badges, and compete on the leaderboard.
               </p>
             </div>
           </div>
@@ -321,7 +303,7 @@ const DashboardPage = () => {
             </a>
           </div>
 
-          {/* Updated Stats Grid */}
+          {/* Stats Grid */}
           <div className="dash-stats-grid">
             <StatCard
               icon="📦"
@@ -380,7 +362,9 @@ const DashboardPage = () => {
 
               <div className="dash-tips-grid">
                 <div className="dash-tip-item">
-                  <span className="dash-tip-emoji">{streakBadge?.emoji || "🔥"}</span>
+                  <span className="dash-tip-emoji">
+                    {streakBadge?.emoji || "🔥"}
+                  </span>
                   <div>
                     <p className="dash-tip-title">
                       Streak Status: {streakBadge?.label || "No Streak"}

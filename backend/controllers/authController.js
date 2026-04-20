@@ -1,5 +1,3 @@
-
-
 const axios = require("axios");
 const bcrypt = require("bcryptjs");
 const User = require("../models/User");
@@ -104,13 +102,29 @@ const login = async (req, res) => {
 
 // ─── GitHub Login Start ─────────────────────────────────
 const githubLogin = (req, res) => {
+  // ✅ FIXED - Token se userId nikalo aur state me bhejo
   const redirectUri = `${process.env.BACKEND_URL}/auth/github/callback`;
+
+  // Token se user ID nikalne ki koshish
+  let stateParam = "login";
+  const authHeader = req.headers.authorization;
+  if (authHeader && authHeader.startsWith("Bearer ")) {
+    const token = authHeader.split(" ")[1];
+    try {
+      const jwt = require("jsonwebtoken");
+      const decoded = jwt.verify(token, process.env.JWT_SECRET);
+      stateParam = `connect_${decoded.id}`;
+    } catch (e) {
+      stateParam = "login";
+    }
+  }
 
   const url =
     `https://github.com/login/oauth/authorize` +
     `?client_id=${process.env.GITHUB_CLIENT_ID}` +
     `&redirect_uri=${encodeURIComponent(redirectUri)}` +
-    `&scope=read:user user:email repo`;
+    `&scope=read:user user:email repo` +
+    `&state=${stateParam}`;
 
   res.redirect(url);
 };
@@ -171,11 +185,15 @@ const githubCallback = async (req, res) => {
       lastRefreshed: new Date(),
     };
 
-    // existing user connect
+    // ✅ FIXED - existing user connect
     if (state && state.startsWith("connect_")) {
       const userId = state.replace("connect_", "");
       await User.findByIdAndUpdate(userId, updateData);
-      return res.redirect(`${process.env.CLIENT_URL}/dashboard`);
+      
+      // ✅ ?github=connected add kiya
+      return res.redirect(
+        `${process.env.CLIENT_URL}/dashboard?github=connected`
+      );
     }
 
     // new / login
@@ -211,4 +229,3 @@ module.exports = {
   githubCallback,
   logout,
 };
-
