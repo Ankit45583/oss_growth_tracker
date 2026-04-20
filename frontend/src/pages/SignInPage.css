@@ -1,0 +1,249 @@
+.signin-page {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px 16px;
+  position: relative;
+  overflow: hidden;
+}
+
+.signin-blob {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(80px);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.signin-blob-1 {
+  width: 400px;
+  height: 400px;
+  background: rgba(88, 166, 255, 0.06);
+  top: -120px;
+  right: -100px;
+}
+
+.signin-blob-2 {
+  width: 350px;
+  height: 350px;
+  background: rgba(35, 134, 54, 0.05);
+  bottom: -100px;
+  left: -80px;
+}
+
+.signin-container {
+  width: 100%;
+  max-width: 420px;
+  position: relative;
+  z-index: 1;
+}
+
+.signin-header {
+  text-align: center;
+  margin-bottom: 28px;
+}
+
+.signin-icon {
+  width: 64px;
+  height: 64px;
+  background: #1f6feb;
+  border-radius: var(--radius-xl);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 18px;
+  box-shadow: 0 4px 20px rgba(31, 111, 235, 0.35);
+}
+
+.signin-title {
+  font-size: 22px;
+  font-weight: 800;
+  color: var(--text-primary);
+  margin-bottom: 8px;
+}
+
+.signin-subtitle {
+  font-size: 14px;
+  color: var(--text-secondary);
+}
+
+.signin-card {
+  box-shadow: var(--shadow-lg);
+}
+
+.signin-github-notice {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 14px;
+  background: rgba(35, 134, 54, 0.08);
+  border: 1px solid rgba(35, 134, 54, 0.25);
+  border-radius: var(--radius-md);
+  margin-bottom: 20px;
+  font-size: 13px;
+  color: #3fb950;
+  line-height: 1.5;
+}
+
+.signin-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.signin-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.signin-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+.signin-input {
+  width: 100%;
+  background: var(--bg-primary);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 10px 14px;
+  font-size: 14px;
+  color: var(--text-primary);
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.signin-input::placeholder {
+  color: var(--text-muted);
+}
+
+.signin-input:focus {
+  border-color: var(--accent-blue);
+  box-shadow: 0 0 0 3px rgba(88, 166, 255, 0.1);
+}
+
+.signin-input:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.signin-password-wrap {
+  position: relative;
+}
+
+.signin-password-wrap .signin-input {
+  padding-right: 44px;
+}
+
+.signin-eye {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: transparent;
+  border: none;
+  font-size: 16px;
+  cursor: pointer;
+  padding: 4px;
+  opacity: 0.6;
+}
+
+.signin-eye:hover {
+  opacity: 1;
+}
+
+.signin-submit {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  background: #1f6feb;
+  color: #fff;
+  font-size: 15px;
+  font-weight: 600;
+  padding: 12px 20px;
+  border-radius: var(--radius-md);
+  border: none;
+  cursor: pointer;
+  transition: background 0.2s ease, transform 0.2s ease;
+  margin-top: 4px;
+}
+
+.signin-submit:hover:not(:disabled) {
+  background: var(--accent-blue);
+}
+
+.signin-submit:active:not(:disabled) {
+  transform: scale(0.98);
+}
+
+.signin-submit:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.signin-spinner {
+  width: 18px;
+  height: 18px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+}
+
+.signin-toggle-text {
+  text-align: center;
+  font-size: 13px;
+  color: var(--text-secondary);
+  margin-bottom: 16px;
+}
+
+.signin-toggle-btn {
+  background: none;
+  border: none;
+  color: var(--accent-blue);
+  font-weight: 600;
+  cursor: pointer;
+  font-size: 13px;
+  padding: 0;
+}
+
+.signin-toggle-btn:hover {
+  text-decoration: underline;
+}
+
+.signin-divider {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 16px;
+}
+
+.signin-divider-line {
+  flex: 1;
+  height: 1px;
+  background: var(--border);
+}
+
+.signin-divider-text {
+  font-size: 12px;
+  color: var(--text-muted);
+  text-transform: uppercase;
+}
+
+.signin-back-link {
+  display: block;
+  text-align: center;
+  font-size: 13px;
+  color: var(--accent-green);
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.signin-back-link:hover {
+  text-decoration: underline;
+}

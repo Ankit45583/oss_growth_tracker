@@ -1,0 +1,62 @@
+/* StatCard.css */
+.stat-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 24px 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  transition: border-color var(--transition), transform var(--transition);
+}
+
+.stat-card:hover {
+  transform: translateY(-2px);
+}
+
+.stat-card-blue:hover  { border-color: var(--accent-blue); }
+.stat-card-green:hover { border-color: var(--accent-green); }
+.stat-card-purple:hover{ border-color: var(--accent-purple); }
+.stat-card-yellow:hover{ border-color: var(--accent-yellow); }
+
+.stat-card-icon-wrap {
+  width: 52px;
+  height: 52px;
+  border-radius: var(--radius-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 14px;
+}
+
+.stat-icon-blue   { background: rgba(88, 166, 255, 0.12); }
+.stat-icon-green  { background: rgba(35, 134, 54, 0.15); }
+.stat-icon-purple { background: rgba(163, 113, 247, 0.12); }
+.stat-icon-yellow { background: rgba(227, 179, 65, 0.12); }
+
+.stat-card-icon {
+  font-size: 26px;
+  line-height: 1;
+}
+
+.stat-card-value {
+  font-size: 30px;
+  font-weight: 800;
+  color: var(--text-primary);
+  line-height: 1.1;
+  margin-bottom: 6px;
+}
+
+.stat-card-label {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-secondary);
+}
+
+.stat-card-sub {
+  font-size: 11px;
+  color: var(--text-muted);
+  margin-top: 4px;
+}

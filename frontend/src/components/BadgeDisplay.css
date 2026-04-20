@@ -1,0 +1,103 @@
+/* BadgeDisplay.css */
+.badge-card { height: 100%; }
+
+.badge-current {
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 20px;
+  text-align: center;
+  margin-bottom: 20px;
+  transition: border-color var(--transition);
+}
+
+.badge-emoji-wrap {
+  width: 70px;
+  height: 70px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 12px;
+}
+
+.badge-emoji {
+  font-size: 38px;
+  line-height: 1;
+}
+
+.badge-label {
+  font-size: 20px;
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+
+.badge-commits {
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+
+/* Progress bar */
+.badge-progress-section {
+  margin-top: 16px;
+}
+
+.badge-progress-labels {
+  display: flex;
+  justify-content: space-between;
+  font-size: 11px;
+  color: var(--text-muted);
+  margin-bottom: 6px;
+}
+
+.badge-progress-track {
+  height: 6px;
+  background: var(--bg-hover);
+  border-radius: 99px;
+  overflow: hidden;
+}
+
+.badge-progress-fill {
+  height: 100%;
+  border-radius: 99px;
+  transition: width 0.6s ease;
+}
+
+/* All badges list */
+.badge-all-label {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-muted);
+  margin-bottom: 10px;
+}
+
+.badge-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.badge-pill {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 10px;
+  border-radius: 99px;
+  border: 1px solid var(--border);
+  font-size: 12px;
+  transition: opacity var(--transition);
+}
+
+.badge-pill-earned {
+  opacity: 1;
+}
+
+.badge-pill-locked {
+  opacity: 0.35;
+  filter: grayscale(1);
+}
+
+.badge-pill-label {
+  color: var(--text-secondary);
+}
