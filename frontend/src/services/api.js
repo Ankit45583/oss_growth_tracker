@@ -102,7 +102,7 @@ export const userService = {
   connectGithub: async () => {
   const response = await api.get("/auth/github/connect");
   return response.data;
-},
+},  
 };
 
 // REPO SERVICES

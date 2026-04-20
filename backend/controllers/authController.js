@@ -236,7 +236,7 @@ const fetchGithubProfile = async (username = null, accessToken = null) => {
     console.error("[GitHub] Profile fetch failed:", error.message);
     throw error;
   }
-};
+};  
     // Step 3: Parallel fetch commits + streak
     const [totalCommits, streakData] = await Promise.all([
       fetchTotalCommits(ghProfile.login, accessToken),
