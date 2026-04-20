@@ -15,7 +15,7 @@ router.post("/register", register);
 router.post("/login", login);
 
 // ─── GitHub OAuth ──────────────────────────
-router.get("/github", githubLogin);
+router.get("/github/connect", githubLogin);
 router.get("/github/callback", githubCallback);
 
 // ─── Logout ────────────────────────────────
