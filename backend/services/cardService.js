@@ -29,7 +29,7 @@ const getBestMonth = (repos) => {
   return Object.entries(monthCount).sort((a, b) => b[1] - a[1])[0][0];
 };
 
-// ✅ Beautiful GitHub Wrapped Style SVG Card
+// ✅ Exact GitHub Wrapped Design
 const generateSVGCard = (cardData) => {
   const {
     username,
@@ -44,206 +44,167 @@ const generateSVGCard = (cardData) => {
     badge,
   } = cardData;
 
-  return `<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="600" viewBox="0 0 1000 600">
+  const currentYear = new Date().getFullYear();
+
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="800" height="1000" viewBox="0 0 800 1000">
   <defs>
-    <!-- Gradients -->
-    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" style="stop-color:#1a1a2e;stop-opacity:1" />
-      <stop offset="50%" style="stop-color:#16213e;stop-opacity:1" />
-      <stop offset="100%" style="stop-color:#0f3460;stop-opacity:1" />
+    <!-- Background Gradient -->
+    <linearGradient id="mainBg" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#0d1117"/>
+      <stop offset="100%" style="stop-color:#161b22"/>
     </linearGradient>
     
-    <linearGradient id="accentGrad" x1="0%" y1="0%" x2="100%" y2="0%">
-      <stop offset="0%" style="stop-color:#00d4ff;stop-opacity:1" />
-      <stop offset="100%" style="stop-color:#7b2ff7;stop-opacity:1" />
+    <!-- Card Gradients -->
+    <linearGradient id="purple" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#7c3aed"/>
+      <stop offset="100%" style="stop-color:#a78bfa"/>
+    </linearGradient>
+    
+    <linearGradient id="blue" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#2563eb"/>
+      <stop offset="100%" style="stop-color:#60a5fa"/>
+    </linearGradient>
+    
+    <linearGradient id="green" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#059669"/>
+      <stop offset="100%" style="stop-color:#34d399"/>
+    </linearGradient>
+    
+    <linearGradient id="orange" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#ea580c"/>
+      <stop offset="100%" style="stop-color:#fb923c"/>
+    </linearGradient>
+    
+    <linearGradient id="pink" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#db2777"/>
+      <stop offset="100%" style="stop-color:#f472b6"/>
     </linearGradient>
 
-    <linearGradient id="commitGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" style="stop-color:#00d4ff;stop-opacity:0.8" />
-      <stop offset="100%" style="stop-color:#0091ea;stop-opacity:0.8" />
-    </linearGradient>
-
-    <linearGradient id="repoGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" style="stop-color:#00e676;stop-opacity:0.8" />
-      <stop offset="100%" style="stop-color:#00c853;stop-opacity:0.8" />
-    </linearGradient>
-
-    <linearGradient id="streakGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" style="stop-color:#ff6b6b;stop-opacity:0.8" />
-      <stop offset="100%" style="stop-color:#ff5252;stop-opacity:0.8" />
-    </linearGradient>
-
-    <linearGradient id="bestGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" style="stop-color:#ffd700;stop-opacity:0.8" />
-      <stop offset="100%" style="stop-color:#ffa000;stop-opacity:0.8" />
-    </linearGradient>
-
-    <linearGradient id="scoreGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" style="stop-color:#c471ed;stop-opacity:0.8" />
-      <stop offset="100%" style="stop-color:#7b2ff7;stop-opacity:0.8" />
-    </linearGradient>
-
-    <filter id="glow">
-      <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
-      <feMerge>
-        <feMergeNode in="coloredBlur"/>
-        <feMergeNode in="SourceGraphic"/>
-      </feMerge>
-    </filter>
-
-    <clipPath id="avatarClip">
-      <circle cx="100" cy="100" r="50"/>
+    <clipPath id="roundAvatar">
+      <circle cx="400" cy="180" r="60"/>
     </clipPath>
   </defs>
 
-  <!-- Background -->
-  <rect width="1000" height="600" fill="url(#bgGrad)" rx="20"/>
+  <!-- Main Background -->
+  <rect width="800" height="1000" fill="url(#mainBg)" rx="24"/>
   
-  <!-- Outer Border Glow -->
-  <rect width="996" height="596" x="2" y="2" fill="none" 
-    stroke="url(#accentGrad)" stroke-width="2" rx="18" opacity="0.6"/>
-
-  <!-- Top Banner -->
-  <rect width="1000" height="5" fill="url(#accentGrad)" rx="20"/>
-
-  <!-- Header Section -->
-  <text x="500" y="50" font-family="'Segoe UI', Arial, sans-serif" 
-    font-size="32" font-weight="bold" fill="#ffffff" 
-    text-anchor="middle" filter="url(#glow)">
-    🎉 GitHub Wrapped 2026 🎉
+  <!-- Title -->
+  <text x="400" y="80" font-family="'SF Pro Display', -apple-system, Arial, sans-serif" 
+    font-size="48" font-weight="700" fill="#ffffff" text-anchor="middle">
+    GitHub Wrapped
+  </text>
+  
+  <text x="400" y="115" font-family="'SF Pro Display', -apple-system, Arial, sans-serif" 
+    font-size="32" font-weight="600" fill="#8b949e" text-anchor="middle">
+    ${currentYear}
   </text>
 
-  <!-- Avatar Circle with Glow -->
-  <circle cx="100" cy="140" r="55" fill="none" 
-    stroke="url(#accentGrad)" stroke-width="3" filter="url(#glow)"/>
-  <image href="${avatar}" x="50" y="90" 
-    width="100" height="100" clip-path="url(#avatarClip)"/>
+  <!-- Avatar -->
+  <circle cx="400" cy="180" r="65" fill="none" stroke="#30363d" stroke-width="4"/>
+  <image href="${avatar}" x="340" y="120" width="120" height="120" clip-path="url(#roundAvatar)"/>
 
   <!-- Username -->
-  <text x="180" y="130" font-family="'Segoe UI', Arial, sans-serif" 
-    font-size="36" font-weight="bold" fill="#ffffff">
+  <text x="400" y="280" font-family="'SF Pro Display', -apple-system, Arial, sans-serif" 
+    font-size="28" font-weight="600" fill="#ffffff" text-anchor="middle">
     @${username}
   </text>
 
   <!-- Badge -->
-  <text x="180" y="160" font-family="'Segoe UI', Arial, sans-serif" 
-    font-size="18" fill="#00d4ff">
-    ${badge?.emoji || "🌱"} ${badge?.label || "Beginner Developer"}
+  <text x="400" y="315" font-family="'SF Pro Display', -apple-system, Arial, sans-serif" 
+    font-size="18" font-weight="500" fill="#8b949e" text-anchor="middle">
+    ${badge?.emoji || "🌱"} ${badge?.label || "Developer"}
   </text>
 
-  <!-- Divider -->
-  <line x1="50" y1="200" x2="950" y2="200" 
-    stroke="url(#accentGrad)" stroke-width="2" opacity="0.5"/>
-
-  <!-- Stats Grid -->
+  <!-- Stats Cards -->
   
-  <!-- Total Commits Card -->
-  <rect x="50" y="230" width="180" height="140" 
-    fill="url(#commitGrad)" rx="15" filter="url(#glow)" opacity="0.9"/>
-  <text x="140" y="265" font-family="'Segoe UI', Arial, sans-serif" 
-    font-size="14" fill="#ffffff" text-anchor="middle" opacity="0.9">
-    TOTAL COMMITS
+  <!-- Total Commits -->
+  <rect x="60" y="360" width="330" height="160" fill="url(#purple)" rx="16"/>
+  <text x="225" y="410" font-family="'SF Pro Display', -apple-system, Arial, sans-serif" 
+    font-size="18" font-weight="600" fill="#ffffff" text-anchor="middle" opacity="0.9">
+    Total Commits
   </text>
-  <text x="140" y="310" font-family="'Segoe UI', Arial, sans-serif" 
-    font-size="48" font-weight="bold" fill="#ffffff" text-anchor="middle">
-    ${totalCommits}
+  <text x="225" y="470" font-family="'SF Pro Display', -apple-system, Arial, sans-serif" 
+    font-size="56" font-weight="700" fill="#ffffff" text-anchor="middle">
+    ${totalCommits.toLocaleString()}
   </text>
-  <text x="140" y="355" font-family="Arial" 
-    font-size="32" text-anchor="middle">💻</text>
 
-  <!-- Repositories Card -->
-  <rect x="250" y="230" width="180" height="140" 
-    fill="url(#repoGrad)" rx="15" filter="url(#glow)" opacity="0.9"/>
-  <text x="340" y="265" font-family="'Segoe UI', Arial, sans-serif" 
-    font-size="14" fill="#ffffff" text-anchor="middle" opacity="0.9">
-    REPOSITORIES
+  <!-- Total Repos -->
+  <rect x="410" y="360" width="330" height="160" fill="url(#blue)" rx="16"/>
+  <text x="575" y="410" font-family="'SF Pro Display', -apple-system, Arial, sans-serif" 
+    font-size="18" font-weight="600" fill="#ffffff" text-anchor="middle" opacity="0.9">
+    Repositories
   </text>
-  <text x="340" y="310" font-family="'Segoe UI', Arial, sans-serif" 
-    font-size="48" font-weight="bold" fill="#ffffff" text-anchor="middle">
+  <text x="575" y="470" font-family="'SF Pro Display', -apple-system, Arial, sans-serif" 
+    font-size="56" font-weight="700" fill="#ffffff" text-anchor="middle">
     ${totalRepos}
   </text>
-  <text x="340" y="355" font-family="Arial" 
-    font-size="32" text-anchor="middle">📦</text>
 
-  <!-- Current Streak Card -->
-  <rect x="450" y="230" width="180" height="140" 
-    fill="url(#streakGrad)" rx="15" filter="url(#glow)" opacity="0.9"/>
-  <text x="540" y="265" font-family="'Segoe UI', Arial, sans-serif" 
-    font-size="14" fill="#ffffff" text-anchor="middle" opacity="0.9">
-    CURRENT STREAK
+  <!-- Current Streak -->
+  <rect x="60" y="540" width="330" height="160" fill="url(#orange)" rx="16"/>
+  <text x="225" y="590" font-family="'SF Pro Display', -apple-system, Arial, sans-serif" 
+    font-size="18" font-weight="600" fill="#ffffff" text-anchor="middle" opacity="0.9">
+    Current Streak
   </text>
-  <text x="540" y="310" font-family="'Segoe UI', Arial, sans-serif" 
-    font-size="48" font-weight="bold" fill="#ffffff" text-anchor="middle">
+  <text x="225" y="650" font-family="'SF Pro Display', -apple-system, Arial, sans-serif" 
+    font-size="56" font-weight="700" fill="#ffffff" text-anchor="middle">
     ${currentStreak}
   </text>
-  <text x="540" y="340" font-family="'Segoe UI', Arial, sans-serif" 
-    font-size="16" fill="#ffffff" text-anchor="middle">
-    days
+  <text x="225" y="680" font-family="'SF Pro Display', -apple-system, Arial, sans-serif" 
+    font-size="20" font-weight="500" fill="#ffffff" text-anchor="middle" opacity="0.8">
+    days 🔥
   </text>
-  <text x="540" y="362" font-family="Arial" 
-    font-size="24" text-anchor="middle">🔥</text>
 
-  <!-- Longest Streak Card -->
-  <rect x="650" y="230" width="180" height="140" 
-    fill="url(#bestGrad)" rx="15" filter="url(#glow)" opacity="0.9"/>
-  <text x="740" y="265" font-family="'Segoe UI', Arial, sans-serif" 
-    font-size="14" fill="#ffffff" text-anchor="middle" opacity="0.9">
-    LONGEST STREAK
+  <!-- Longest Streak -->
+  <rect x="410" y="540" width="330" height="160" fill="url(#green)" rx="16"/>
+  <text x="575" y="590" font-family="'SF Pro Display', -apple-system, Arial, sans-serif" 
+    font-size="18" font-weight="600" fill="#ffffff" text-anchor="middle" opacity="0.9">
+    Longest Streak
   </text>
-  <text x="740" y="310" font-family="'Segoe UI', Arial, sans-serif" 
-    font-size="48" font-weight="bold" fill="#ffffff" text-anchor="middle">
+  <text x="575" y="650" font-family="'SF Pro Display', -apple-system, Arial, sans-serif" 
+    font-size="56" font-weight="700" fill="#ffffff" text-anchor="middle">
     ${longestStreak}
   </text>
-  <text x="740" y="340" font-family="'Segoe UI', Arial, sans-serif" 
-    font-size="16" fill="#ffffff" text-anchor="middle">
-    days
+  <text x="575" y="680" font-family="'SF Pro Display', -apple-system, Arial, sans-serif" 
+    font-size="20" font-weight="500" fill="#ffffff" text-anchor="middle" opacity="0.8">
+    days 🏆
   </text>
-  <text x="740" y="362" font-family="Arial" 
-    font-size="24" text-anchor="middle">🏆</text>
 
-  <!-- Score Card -->
-  <rect x="50" y="390" width="180" height="140" 
-    fill="url(#scoreGrad)" rx="15" filter="url(#glow)" opacity="0.9"/>
-  <text x="140" y="425" font-family="'Segoe UI', Arial, sans-serif" 
-    font-size="14" fill="#ffffff" text-anchor="middle" opacity="0.9">
-    TOTAL SCORE
+  <!-- Score -->
+  <rect x="60" y="720" width="680" height="120" fill="url(#pink)" rx="16"/>
+  <text x="400" y="765" font-family="'SF Pro Display', -apple-system, Arial, sans-serif" 
+    font-size="18" font-weight="600" fill="#ffffff" text-anchor="middle" opacity="0.9">
+    Total Score
   </text>
-  <text x="140" y="470" font-family="'Segoe UI', Arial, sans-serif" 
-    font-size="48" font-weight="bold" fill="#ffffff" text-anchor="middle">
-    ${score}
+  <text x="400" y="815" font-family="'SF Pro Display', -apple-system, Arial, sans-serif" 
+    font-size="48" font-weight="700" fill="#ffffff" text-anchor="middle">
+    ${score.toLocaleString()} ⭐
   </text>
-  <text x="140" y="515" font-family="Arial" 
-    font-size="32" text-anchor="middle">⭐</text>
 
-  <!-- Info Section -->
-  <rect x="250" y="390" width="580" height="140" 
-    fill="#1a1a2e" rx="15" stroke="url(#accentGrad)" 
-    stroke-width="2" opacity="0.8"/>
-
-  <!-- Top Language -->
-  <text x="280" y="425" font-family="'Segoe UI', Arial, sans-serif" 
-    font-size="16" fill="#00d4ff" font-weight="bold">
-    🌟 Top Language:
+  <!-- Additional Info -->
+  <rect x="60" y="860" width="680" height="80" fill="#21262d" rx="12" stroke="#30363d" stroke-width="1"/>
+  
+  <text x="80" y="895" font-family="'SF Pro Display', -apple-system, Arial, sans-serif" 
+    font-size="16" font-weight="600" fill="#8b949e">
+    Top Language:
   </text>
-  <text x="280" y="455" font-family="'Segoe UI', Arial, sans-serif" 
-    font-size="24" fill="#ffffff" font-weight="bold">
+  <text x="80" y="920" font-family="'SF Pro Display', -apple-system, Arial, sans-serif" 
+    font-size="20" font-weight="600" fill="#58a6ff">
     ${topLanguage || "Not Available"}
   </text>
 
-  <!-- Best Month -->
-  <text x="280" y="490" font-family="'Segoe UI', Arial, sans-serif" 
-    font-size="16" fill="#00d4ff" font-weight="bold">
-    📅 Most Active Month:
+  <text x="400" y="895" font-family="'SF Pro Display', -apple-system, Arial, sans-serif" 
+    font-size="16" font-weight="600" fill="#8b949e">
+    Most Active:
   </text>
-  <text x="280" y="520" font-family="'Segoe UI', Arial, sans-serif" 
-    font-size="20" fill="#ffffff">
-    ${bestMonth || "Not Available"}
+  <text x="400" y="920" font-family="'SF Pro Display', -apple-system, Arial, sans-serif" 
+    font-size="20" font-weight="600" fill="#58a6ff">
+    ${bestMonth || "N/A"}
   </text>
 
   <!-- Footer -->
-  <text x="500" y="575" font-family="'Segoe UI', Arial, sans-serif" 
-    font-size="14" fill="#7b2ff7" text-anchor="middle">
-    Generated by OSS Growth Tracker • oss-growth-tracker.vercel.app
+  <text x="400" y="975" font-family="'SF Pro Display', -apple-system, Arial, sans-serif" 
+    font-size="14" font-weight="500" fill="#484f58" text-anchor="middle">
+    oss-growth-tracker.vercel.app
   </text>
 </svg>`;
 };
@@ -274,7 +235,6 @@ const generateCard = async (username) => {
     }
   } catch (err) {
     console.log("[Card] Could not fetch repos:", err.message);
-    repos = [];
   }
 
   const topLanguage = getTopLanguage(repos);
@@ -294,10 +254,8 @@ const generateCard = async (username) => {
     badge,
   };
 
-  console.log("[Card] Card data ready:", cardData);
-
   const svgCard = generateSVGCard(cardData);
-  console.log("[Card] Beautiful SVG card generated!");
+  console.log("[Card] Exact wrapped card generated!");
 
   return {
     cardUrl: null,
