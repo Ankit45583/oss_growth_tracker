@@ -1,3 +1,4 @@
+const nodeHtmlToImage = require("node-html-to-image");
 const cloudinary = require("cloudinary").v2;
 const User = require("../models/User");
 const { fetchUserRepos } = require("./githubService");
@@ -32,39 +33,33 @@ const getBestMonth = (repos) => {
   return Object.entries(monthCount).sort((a, b) => b[1] - a[1])[0][0];
 };
 
+// ✅ Puppeteer hataya - node-html-to-image use karo
 const htmlToPng = async (html) => {
-  let browser = null;
   try {
-    const puppeteer = require("puppeteer");
-    browser = await puppeteer.launch({
-      headless: "new",
-      args: [
-        "--no-sandbox",
-        "--disable-setuid-sandbox",
-        "--disable-dev-shm-usage",
-        "--disable-gpu",
-        "--no-zygote",
-        "--single-process",
-      ],
-    });
-
-    const page = await browser.newPage();
-    await page.setViewport({ width: 900, height: 500 });
-    await page.setContent(html, { waitUntil: "networkidle0" });
-    await new Promise((resolve) => setTimeout(resolve, 1500));
-
-    const screenshotBuffer = await page.screenshot({
+    console.log("[Card] Converting HTML to PNG...");
+    const buffer = await nodeHtmlToImage({
+      html,
+      quality: 100,
       type: "png",
-      clip: { x: 0, y: 0, width: 900, height: 500 },
-      omitBackground: false,
+      puppeteerArgs: {
+        args: [
+          "--no-sandbox",
+          "--disable-setuid-sandbox",
+          "--disable-dev-shm-usage",
+          "--disable-gpu",
+          "--no-zygote",
+          "--single-process",
+        ],
+      },
+      beforeScreenshot: async (page) => {
+        await page.setViewport({ width: 900, height: 500 });
+      },
     });
-
-    return screenshotBuffer;
+    console.log("[Card] PNG generated successfully");
+    return buffer;
   } catch (err) {
-    console.error("[Card] Puppeteer error:", err.message);
+    console.error("[Card] HTML to PNG error:", err.message);
     throw err;
-  } finally {
-    if (browser) await browser.close();
   }
 };
 
@@ -119,7 +114,6 @@ const uploadToCloudinary = async (buffer, username) => {
 const generateCard = async (username) => {
   console.log("[Card] Generating card for:", username);
 
-  // ✅ Token bhi fetch karo
   const user = await User.findOne({
     $or: [
       { username: username.toLowerCase() },
@@ -140,7 +134,7 @@ const generateCard = async (username) => {
     if (user.githubUsername) {
       repos = await fetchUserRepos(
         user.githubUsername,
-        user.githubAccessToken || null // ✅ Token pass karo
+        user.githubAccessToken || null
       );
     }
   } catch (err) {
@@ -168,7 +162,6 @@ const generateCard = async (username) => {
   console.log("[Card] Card data ready:", cardData);
 
   const html = generateCardHTML(cardData);
-  console.log("[Card] Generating PNG...");
   const pngBuffer = await htmlToPng(html);
 
   console.log("[Card] Uploading to Cloudinary...");
