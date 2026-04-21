@@ -36,7 +36,10 @@ const register = async (req, res) => {
   try {
     const { username, email, password } = req.body;
     if (!username || !email || !password) {
-      return res.status(400).json({ success: false, message: "All fields required" });
+      return res.status(400).json({ 
+        success: false, 
+        message: "All fields required" 
+      });
     }
     const hashedPassword = await bcrypt.hash(password, 10);
     const user = await User.create({
@@ -46,9 +49,16 @@ const register = async (req, res) => {
       avatar: `https://api.dicebear.com/7.x/initials/svg?seed=${username}`,
     });
     const token = generateToken(user._id);
-    res.status(201).json({ success: true, token, data: formatUser(user) });
+    res.status(201).json({ 
+      success: true, 
+      token, 
+      data: formatUser(user) 
+    });
   } catch (err) {
-    res.status(500).json({ success: false, message: "Register failed" });
+    res.status(500).json({ 
+      success: false, 
+      message: "Register failed" 
+    });
   }
 };
 
@@ -56,18 +66,34 @@ const register = async (req, res) => {
 const login = async (req, res) => {
   try {
     const { email, password } = req.body;
-    const user = await User.findOne({ email: email.toLowerCase() }).select("+password");
+    const user = await User.findOne({ 
+      email: email.toLowerCase() 
+    }).select("+password");
+    
     if (!user) {
-      return res.status(401).json({ success: false, message: "Invalid credentials" });
+      return res.status(401).json({ 
+        success: false, 
+        message: "Invalid credentials" 
+      });
     }
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
-      return res.status(401).json({ success: false, message: "Invalid credentials" });
+      return res.status(401).json({ 
+        success: false, 
+        message: "Invalid credentials" 
+      });
     }
     const token = generateToken(user._id);
-    res.json({ success: true, token, data: formatUser(user) });
+    res.json({ 
+      success: true, 
+      token, 
+      data: formatUser(user) 
+    });
   } catch (err) {
-    res.status(500).json({ success: false, message: "Login failed" });
+    res.status(500).json({ 
+      success: false, 
+      message: "Login failed" 
+    });
   }
 };
 
@@ -105,7 +131,7 @@ const githubCallback = async (req, res) => {
   }
 
   try {
-    // 1. exchange code → token
+    // 1. Exchange code → token
     const tokenRes = await axios.post(
       "https://github.com/login/oauth/access_token",
       {
@@ -123,14 +149,16 @@ const githubCallback = async (req, res) => {
 
     if (!accessToken) {
       console.log("❌ Token failed:", tokenRes.data.error);
-      return res.redirect(`${process.env.CLIENT_URL}/login?error=token_failed`);
+      return res.redirect(
+        `${process.env.CLIENT_URL}/login?error=token_failed`
+      );
     }
 
-    // 2. GitHub profile
+    // 2. ✅ GitHub profile - token se fetch hoga
     const ghProfile = await fetchGithubProfile(null, accessToken);
-    console.log("GitHub Profile:", ghProfile.login, ghProfile.id);
+    console.log("✅ GitHub Profile:", ghProfile.login, ghProfile.id);
 
-    // 3. stats
+    // 3. Stats fetch karo
     const [totalCommits, streak] = await Promise.all([
       fetchTotalCommits(ghProfile.login, accessToken),
       calculateUserStreak(ghProfile.login, accessToken),
@@ -161,27 +189,31 @@ const githubCallback = async (req, res) => {
       const userId = state.replace("connect_", "");
       console.log("Connecting GitHub to userId:", userId);
 
-      // Check: ye GitHub account kisi aur se linked to nahi?
+      // ✅ Duplicate check - same user ho to allow karo
       const existingOwner = await User.findOne({
         githubId: String(ghProfile.id),
       });
 
-      if (existingOwner && String(existingOwner._id) !== String(userId)) {
+      if (
+        existingOwner &&
+        String(existingOwner._id) !== String(userId)
+      ) {
         console.log("❌ GitHub already linked to another user");
         return res.redirect(
           `${process.env.CLIENT_URL}/dashboard?error=github_already_linked`
         );
       }
 
+      // ✅ Agar pehle se linked tha same user se - update karo
       await User.findByIdAndUpdate(userId, updateData);
-      console.log("✅ GitHub connected successfully to userId:", userId);
+      console.log("✅ GitHub connected to userId:", userId);
 
       return res.redirect(
         `${process.env.CLIENT_URL}/dashboard?github=connected`
       );
     }
 
-    // GitHub se direct login
+    // ─── GitHub se direct login ───────────────────────
     const user = await User.findOneAndUpdate(
       { githubId: String(ghProfile.id) },
       {
@@ -193,7 +225,9 @@ const githubCallback = async (req, res) => {
     );
 
     const jwtToken = generateToken(user._id);
-    res.redirect(`${process.env.CLIENT_URL}/auth/success?token=${jwtToken}`);
+    res.redirect(
+      `${process.env.CLIENT_URL}/auth/success?token=${jwtToken}`
+    );
   } catch (err) {
     console.error("GitHub callback error:", err.message);
     res.redirect(`${process.env.CLIENT_URL}/login?error=server_error`);

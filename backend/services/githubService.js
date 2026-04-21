@@ -1,13 +1,7 @@
-// services/githubService.js
-// Tumhara existing fetchTotalCommits yahan move kiya — improved version
-
 const axios = require("axios");
 
 const GITHUB_API = "https://api.github.com";
 
-/**
- * GitHub API headers banao
- */
 const getHeaders = (accessToken = null) => {
   const headers = {
     Accept: "application/vnd.github.v3+json",
@@ -19,13 +13,25 @@ const getHeaders = (accessToken = null) => {
 };
 
 /**
- * GitHub user profile fetch karo
+ * ✅ FIXED - accessToken ho to /user use karo, warna /users/:username
  */
 const fetchGithubProfile = async (username, accessToken = null) => {
   try {
-    const res = await axios.get(`${GITHUB_API}/users/${username}`, {
-      headers: getHeaders(accessToken),
-    });
+    let res;
+
+    if (accessToken) {
+      // ✅ Token se authenticated user ka profile lo
+      res = await axios.get(`${GITHUB_API}/user`, {
+        headers: getHeaders(accessToken),
+      });
+    } else {
+      // Public profile
+      res = await axios.get(`${GITHUB_API}/users/${username}`, {
+        headers: getHeaders(null),
+      });
+    }
+
+    console.log("[GitHub] Profile fetched:", res.data.login, res.data.id);
     return res.data;
   } catch (error) {
     console.error("[GitHub] Profile fetch failed:", error.message);
@@ -38,10 +44,21 @@ const fetchGithubProfile = async (username, accessToken = null) => {
  */
 const fetchUserRepos = async (username, accessToken = null) => {
   try {
-    const res = await axios.get(
-      `${GITHUB_API}/users/${username}/repos?per_page=100&sort=updated`,
-      { headers: getHeaders(accessToken) }
-    );
+    let res;
+
+    if (accessToken) {
+      // ✅ Token se authenticated user ke repos lo
+      res = await axios.get(
+        `${GITHUB_API}/user/repos?per_page=100&sort=updated&type=owner`,
+        { headers: getHeaders(accessToken) }
+      );
+    } else {
+      res = await axios.get(
+        `${GITHUB_API}/users/${username}/repos?per_page=100&sort=updated`,
+        { headers: getHeaders(null) }
+      );
+    }
+
     return res.data;
   } catch (error) {
     console.error("[GitHub] Repos fetch failed:", error.message);
@@ -50,8 +67,7 @@ const fetchUserRepos = async (username, accessToken = null) => {
 };
 
 /**
- * Total commits fetch karo (3 fallback methods)
- * Tumhara existing logic — cleanly organized
+ * Total commits fetch karo
  */
 const fetchTotalCommits = async (username, accessToken = null) => {
   let totalCommits = 0;
@@ -125,7 +141,7 @@ const fetchTotalCommits = async (username, accessToken = null) => {
 };
 
 /**
- * User ke commit dates fetch karo (streak ke liye)
+ * Commit dates fetch karo (streak ke liye)
  */
 const fetchCommitDates = async (username, accessToken = null) => {
   const commitDates = [];
