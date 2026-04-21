@@ -31,7 +31,7 @@ const getBestMonth = (repos) => {
   return Object.entries(monthCount).sort((a, b) => b[1] - a[1])[0][0];
 };
 
-// ---------------- MAIN SVG ----------------
+// ---------------- SVG GENERATOR ----------------
 const generateSVGCard = (data) => {
   const {
     username,
@@ -47,7 +47,7 @@ const generateSVGCard = (data) => {
   } = data;
 
   return `
-<svg width="1000" height="600" viewBox="0 0 1000 600" xmlns="http://www.w3.org/2000/svg">
+<svg width="1200" height="700" viewBox="0 0 1200 700" xmlns="http://www.w3.org/2000/svg">
 
   <!-- BACKGROUND -->
   <defs>
@@ -57,7 +57,7 @@ const generateSVGCard = (data) => {
     </linearGradient>
 
     <radialGradient id="glow" cx="85%" cy="20%" r="60%">
-      <stop offset="0%" stop-color="#22c55e" stop-opacity="0.4"/>
+      <stop offset="0%" stop-color="#22c55e" stop-opacity="0.35"/>
       <stop offset="100%" stop-color="transparent"/>
     </radialGradient>
   </defs>
@@ -66,35 +66,34 @@ const generateSVGCard = (data) => {
   <rect width="100%" height="100%" rx="20" fill="url(#glow)"/>
 
   <!-- PROFILE -->
-  <image href="${avatar}" x="40" y="40" width="70" height="70"
-    clip-path="circle(35px at 35px 35px)"/>
-  <circle cx="75" cy="75" r="38"
-    stroke="#22c55e" stroke-width="3" fill="none"/>
+  <image href="${avatar}" x="60" y="60" width="80" height="80"
+    clip-path="circle(40px at 40px 40px)"/>
+  <circle cx="100" cy="100" r="45"
+    stroke="#22c55e" stroke-width="4" fill="none"/>
 
-  <text x="130" y="70" fill="white" font-size="28" font-weight="600">
+  <text x="170" y="90" fill="white" font-size="32" font-weight="700">
     @${username}
   </text>
 
-  <text x="130" y="100" fill="#94a3b8" font-size="16">
+  <text x="170" y="120" fill="#94a3b8" font-size="18">
     GitHub Wrapped 2024 • OSS Tracker
   </text>
 
   <!-- BADGE -->
-  <rect x="820" y="50" rx="20" ry="20"
-    width="140" height="40" fill="#052e16"/>
-  <text x="835" y="75" fill="#22c55e" font-size="14">
+  <rect x="950" y="70" rx="25" ry="25" width="180" height="50" fill="#052e16"/>
+  <text x="970" y="100" fill="#22c55e" font-size="18">
     ${badge?.emoji || "🌱"} ${badge?.label || "Beginner"}
   </text>
 
-  <!-- SMALL CARDS -->
-  ${card(40,150,"💻","Total Commits",totalCommits,"All repositories")}
-  ${card(260,150,"🔥","Longest Streak",longestStreak,"Current: ${currentStreak} days")}
-  ${card(480,150,"📦","Repositories",totalRepos,"Public repos")}
-  ${card(700,150,"🌐","Top Language",topLanguage,"Most used")}
+  <!-- TOP ROW (4 CARDS) -->
+  ${card(60,180,"💻","Total Commits",totalCommits,"All repositories")}
+  ${card(340,180,"🔥","Longest Streak",longestStreak,`Current: ${currentStreak} days`)}
+  ${card(620,180,"📦","Repositories",totalRepos,"Public repos")}
+  ${card(900,180,"🌐","Top Language",topLanguage || "N/A","Most used")}
 
-  <!-- BIG CARDS -->
-  ${bigCard(40,330,"📅",bestMonth,"Most Active Month","Highest commit activity")}
-  ${bigCard(520,330,"⭐",score,"Total Score","Commits + Repos + Streak")}
+  <!-- BOTTOM ROW (2 CARDS) -->
+  ${bigCard(60,400,"📅",bestMonth || "N/A","Most Active Month","Highest commit activity")}
+  ${bigCard(620,400,"⭐",score,"Total Score","Commits + Repos + Streak")}
 
 </svg>
 `;
@@ -102,24 +101,44 @@ const generateSVGCard = (data) => {
   function card(x, y, icon, title, value, sub) {
     return `
     <g>
-      <rect x="${x}" y="${y}" width="200" height="130"
-        rx="16" fill="#0f172a" stroke="#1e293b"/>
-      <text x="${x+20}" y="${y+30}" font-size="18">${icon}</text>
-      <text x="${x+20}" y="${y+55}" fill="#94a3b8" font-size="12">${title}</text>
-      <text x="${x+20}" y="${y+90}" fill="white" font-size="26">${value}</text>
-      <text x="${x+20}" y="${y+115}" fill="#64748b" font-size="12">${sub}</text>
+      <rect x="${x}" y="${y}" width="240" height="160"
+        rx="20" fill="#0f172a" stroke="#1e293b"/>
+
+      <text x="${x + 20}" y="${y + 35}" font-size="20">${icon}</text>
+
+      <text x="${x + 20}" y="${y + 65}" fill="#94a3b8" font-size="14">
+        ${title}
+      </text>
+
+      <text x="${x + 20}" y="${y + 105}" fill="white" font-size="34" font-weight="700">
+        ${value}
+      </text>
+
+      <text x="${x + 20}" y="${y + 135}" fill="#64748b" font-size="13">
+        ${sub}
+      </text>
     </g>`;
   }
 
   function bigCard(x, y, icon, value, title, sub) {
     return `
     <g>
-      <rect x="${x}" y="${y}" width="440" height="140"
-        rx="16" fill="#0f172a" stroke="#1e293b"/>
-      <text x="${x+20}" y="${y+40}" font-size="22">${icon}</text>
-      <text x="${x+20}" y="${y+70}" fill="white" font-size="22">${value}</text>
-      <text x="${x+20}" y="${y+95}" fill="#94a3b8" font-size="14">${title}</text>
-      <text x="${x+20}" y="${y+115}" fill="#64748b" font-size="12">${sub}</text>
+      <rect x="${x}" y="${y}" width="500" height="180"
+        rx="20" fill="#0f172a" stroke="#1e293b"/>
+
+      <text x="${x + 20}" y="${y + 45}" font-size="24">${icon}</text>
+
+      <text x="${x + 20}" y="${y + 85}" fill="white" font-size="28" font-weight="700">
+        ${value}
+      </text>
+
+      <text x="${x + 20}" y="${y + 115}" fill="#94a3b8" font-size="16">
+        ${title}
+      </text>
+
+      <text x="${x + 20}" y="${y + 140}" fill="#64748b" font-size="14">
+        ${sub}
+      </text>
     </g>`;
   }
 };
