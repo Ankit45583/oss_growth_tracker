@@ -42,41 +42,33 @@ api.interceptors.response.use(
 
 // AUTH SERVICES
 export const authService = {
-  // Register
   register: async (username, email, password) => {
     const response = await api.post("/auth/register", {
       username,
       email,
       password,
     });
-
     if (response.data?.token) {
       localStorage.setItem("token", response.data.token);
     }
-
     return response.data;
   },
 
-  // Login
   login: async (email, password) => {
     const response = await api.post("/auth/login", {
       email,
       password,
     });
-
     if (response.data?.token) {
       localStorage.setItem("token", response.data.token);
     }
-
     return response.data;
   },
 
-  // GitHub login
   loginWithGithub: () => {
     window.location.assign(`${BASE}/auth/github`);
   },
 
-  // Logout
   logout: async () => {
     try {
       await api.post("/auth/logout");
@@ -99,9 +91,9 @@ export const userService = {
     return response.data;
   },
 
-  // ✅ FIXED - Direct browser redirect, no AJAX
-  connectGithub: () => {
-    window.location.href = `${BASE}/auth/github/connect`;
+  // ✅ userId backend ko bhejo state me
+  connectGithub: (userId) => {
+    window.location.href = `${BASE}/auth/github/connect?userId=${userId}`;
   },
 };
 

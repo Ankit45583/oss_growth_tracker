@@ -1,5 +1,6 @@
 const axios = require("axios");
 const bcrypt = require("bcryptjs");
+const jwt = require("jsonwebtoken");
 const User = require("../models/User");
 const { generateToken } = require("../middleware/auth");
 const {
@@ -34,30 +35,18 @@ const formatUser = (user) => ({
 const register = async (req, res) => {
   try {
     const { username, email, password } = req.body;
-
     if (!username || !email || !password) {
-      return res.status(400).json({
-        success: false,
-        message: "All fields required",
-      });
+      return res.status(400).json({ success: false, message: "All fields required" });
     }
-
     const hashedPassword = await bcrypt.hash(password, 10);
-
     const user = await User.create({
       username: username.toLowerCase(),
       email: email.toLowerCase(),
       password: hashedPassword,
       avatar: `https://api.dicebear.com/7.x/initials/svg?seed=${username}`,
     });
-
     const token = generateToken(user._id);
-
-    res.status(201).json({
-      success: true,
-      token,
-      data: formatUser(user),
-    });
+    res.status(201).json({ success: true, token, data: formatUser(user) });
   } catch (err) {
     res.status(500).json({ success: false, message: "Register failed" });
   }
@@ -67,34 +56,16 @@ const register = async (req, res) => {
 const login = async (req, res) => {
   try {
     const { email, password } = req.body;
-
-    const user = await User.findOne({
-      email: email.toLowerCase(),
-    }).select("+password");
-
+    const user = await User.findOne({ email: email.toLowerCase() }).select("+password");
     if (!user) {
-      return res.status(401).json({
-        success: false,
-        message: "Invalid credentials",
-      });
+      return res.status(401).json({ success: false, message: "Invalid credentials" });
     }
-
     const isMatch = await bcrypt.compare(password, user.password);
-
     if (!isMatch) {
-      return res.status(401).json({
-        success: false,
-        message: "Invalid credentials",
-      });
+      return res.status(401).json({ success: false, message: "Invalid credentials" });
     }
-
     const token = generateToken(user._id);
-
-    res.json({
-      success: true,
-      token,
-      data: formatUser(user),
-    });
+    res.json({ success: true, token, data: formatUser(user) });
   } catch (err) {
     res.status(500).json({ success: false, message: "Login failed" });
   }
@@ -104,16 +75,19 @@ const login = async (req, res) => {
 const githubLogin = (req, res) => {
   const redirectUri = `${process.env.BACKEND_URL}/auth/github/callback`;
 
-  // ✅ Query param se userId lo jo frontend bhejega
+  // ✅ userId query param se lo
   const userId = req.query.userId || null;
   const stateParam = userId ? `connect_${userId}` : "login";
+
+  console.log("GitHub Login - userId:", userId);
+  console.log("GitHub Login - state:", stateParam);
 
   const url =
     `https://github.com/login/oauth/authorize` +
     `?client_id=${process.env.GITHUB_CLIENT_ID}` +
     `&redirect_uri=${encodeURIComponent(redirectUri)}` +
     `&scope=read:user user:email repo` +
-    `&state=${stateParam}`;
+    `&state=${encodeURIComponent(stateParam)}`;
 
   res.redirect(url);
 };
@@ -121,6 +95,10 @@ const githubLogin = (req, res) => {
 // ─── GitHub Callback ────────────────────────────────────
 const githubCallback = async (req, res) => {
   const { code, state } = req.query;
+
+  console.log("=== GitHub Callback Hit ===");
+  console.log("Code:", code ? "YES" : "NO");
+  console.log("State:", state);
 
   if (!code) {
     return res.redirect(`${process.env.CLIENT_URL}/login?error=no_code`);
@@ -140,18 +118,17 @@ const githubCallback = async (req, res) => {
     );
 
     console.log("Token Response:", tokenRes.data);
-console.log("Access Token:", tokenRes.data.access_token);
-console.log("Error:", tokenRes.data.error);
-console.log("Error Description:", tokenRes.data.error_description);
 
     const accessToken = tokenRes.data.access_token;
 
     if (!accessToken) {
+      console.log("❌ Token failed:", tokenRes.data.error);
       return res.redirect(`${process.env.CLIENT_URL}/login?error=token_failed`);
     }
 
     // 2. GitHub profile
     const ghProfile = await fetchGithubProfile(null, accessToken);
+    console.log("GitHub Profile:", ghProfile.login, ghProfile.id);
 
     // 3. stats
     const [totalCommits, streak] = await Promise.all([
@@ -179,18 +156,32 @@ console.log("Error Description:", tokenRes.data.error_description);
       lastRefreshed: new Date(),
     };
 
-    // ✅ FIXED - existing user connect
+    // ✅ Connect existing app user to GitHub
     if (state && state.startsWith("connect_")) {
       const userId = state.replace("connect_", "");
+      console.log("Connecting GitHub to userId:", userId);
+
+      // Check: ye GitHub account kisi aur se linked to nahi?
+      const existingOwner = await User.findOne({
+        githubId: String(ghProfile.id),
+      });
+
+      if (existingOwner && String(existingOwner._id) !== String(userId)) {
+        console.log("❌ GitHub already linked to another user");
+        return res.redirect(
+          `${process.env.CLIENT_URL}/dashboard?error=github_already_linked`
+        );
+      }
+
       await User.findByIdAndUpdate(userId, updateData);
-      
-      // ✅ ?github=connected add kiya
+      console.log("✅ GitHub connected successfully to userId:", userId);
+
       return res.redirect(
         `${process.env.CLIENT_URL}/dashboard?github=connected`
       );
     }
 
-    // new / login
+    // GitHub se direct login
     const user = await User.findOneAndUpdate(
       { githubId: String(ghProfile.id) },
       {
@@ -201,11 +192,10 @@ console.log("Error Description:", tokenRes.data.error_description);
       { new: true, upsert: true }
     );
 
-    const jwt = generateToken(user._id);
-
-    res.redirect(`${process.env.CLIENT_URL}/auth/success?token=${jwt}`);
+    const jwtToken = generateToken(user._id);
+    res.redirect(`${process.env.CLIENT_URL}/auth/success?token=${jwtToken}`);
   } catch (err) {
-    console.error(err.message);
+    console.error("GitHub callback error:", err.message);
     res.redirect(`${process.env.CLIENT_URL}/login?error=server_error`);
   }
 };
