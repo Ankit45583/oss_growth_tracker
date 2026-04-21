@@ -1,10 +1,5 @@
-// controllers/cardController.js
-
 const { generateCard } = require("../services/cardService");
 
-/**
- * GET /api/card/generate/:username
- */
 const generateCardController = async (req, res) => {
   try {
     const { username } = req.params;
@@ -18,26 +13,28 @@ const generateCardController = async (req, res) => {
 
     console.log("[Card] Request for:", username);
 
-    const { cardUrl, cardData } = await generateCard(username);
+    const { svgCard, cardData } = await generateCard(username);
 
+    // ✅ SVG directly bhejo
     return res.json({
       success: true,
-      cardUrl,
-      data: cardData,
+      svgCard,  // Frontend SVG render karega
+      cardData,
     });
+
   } catch (error) {
     console.error("[Card] Controller error:", error.message);
 
     if (error.message === "User not found.") {
       return res.status(404).json({
         success: false,
-        message: "User not found. Make sure the username is correct.",
+        message: "User not found.",
       });
     }
 
     return res.status(500).json({
       success: false,
-      message: "Failed to generate card. Please try again.",
+      message: "Failed to generate card.",
     });
   }
 };

@@ -1,27 +1,24 @@
-// src/components/ShareCard.jsx
-
 import React, { useState } from "react";
-import { cardApiService }   from "../services/card.api";
-import { downloadImage, shareImage } from "../utils/downloadImage";
+import { cardApiService } from "../services/card.api";
 import "./ShareCard.css";
 
 const ShareCard = ({ username }) => {
-  const [loading,  setLoading]  = useState(false);
-  const [cardUrl,  setCardUrl]  = useState(null);
-  const [error,    setError]    = useState("");
-  const [copied,   setCopied]   = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [svgCard, setSvgCard] = useState(null);
+  const [error, setError] = useState("");
+  const [copied, setCopied] = useState(false);
   const [showModal, setShowModal] = useState(false);
 
   const handleGenerate = async () => {
     setLoading(true);
     setError("");
-    setCardUrl(null);
+    setSvgCard(null);
 
     try {
       const res = await cardApiService.generateCard(username);
 
-      if (res.success && res.cardUrl) {
-        setCardUrl(res.cardUrl);
+      if (res.success && res.svgCard) {
+        setSvgCard(res.svgCard);
         setShowModal(true);
       } else {
         setError("Card generation failed.");
@@ -29,27 +26,42 @@ const ShareCard = ({ username }) => {
     } catch (err) {
       setError(
         err.response?.data?.message ||
-        "Failed to generate card. Please try again."
+          "Failed to generate card. Please try again."
       );
     } finally {
       setLoading(false);
     }
   };
 
-  const handleDownload = () => {
-    if (cardUrl) {
-      downloadImage(cardUrl, `${username}-github-wrapped.png`);
+  // ✅ SVG ko PNG me convert karke download karo
+  const handleDownload = async () => {
+    if (!svgCard) return;
+
+    try {
+      const blob = new Blob([svgCard], { type: "image/svg+xml" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `${username}-github-wrapped.svg`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    } catch (err) {
+      console.error("Download failed:", err);
     }
   };
 
-  const handleShare = async () => {
-    if (!cardUrl) return;
-
-    const result = await shareImage(cardUrl, username);
-
-    if (result === "copied") {
+  // ✅ Link copy karo
+  const handleCopyLink = async () => {
+    try {
+      await navigator.clipboard.writeText(
+        `https://oss-growth-tracker.vercel.app/dashboard`
+      );
       setCopied(true);
       setTimeout(() => setCopied(false), 2500);
+    } catch (err) {
+      console.error("Copy failed:", err);
     }
   };
 
@@ -86,7 +98,7 @@ const ShareCard = ({ username }) => {
       )}
 
       {/* Modal */}
-      {showModal && cardUrl && (
+      {showModal && svgCard && (
         <div className="share-modal-overlay" onClick={handleClose}>
           <div
             className="share-modal"
@@ -105,33 +117,44 @@ const ShareCard = ({ username }) => {
               </button>
             </div>
 
-            {/* Card Preview */}
+            {/* ✅ SVG Preview */}
             <div className="share-modal-preview">
-              <img
-                src={cardUrl}
-                alt="GitHub Wrapped Card"
-                className="share-card-image"
+              <div
+                dangerouslySetInnerHTML={{ __html: svgCard }}
+                style={{
+                  width: "100%",
+                  maxWidth: 900,
+                  margin: "0 auto",
+                  borderRadius: 12,
+                  overflow: "hidden",
+                  border: "1px solid #30363d",
+                }}
               />
             </div>
 
             {/* Actions */}
             <div className="share-modal-actions">
+              {/* ✅ SVG Download */}
               <button
                 onClick={handleDownload}
                 className="share-action-btn share-download-btn"
               >
-                ⬇️ Download PNG
+                ⬇️ Download Card
               </button>
 
+              {/* ✅ Copy Link */}
               <button
-                onClick={handleShare}
+                onClick={handleCopyLink}
                 className="share-action-btn share-share-btn"
               >
-                {copied ? "✅ Link Copied!" : "🔗 Share Link"}
+                {copied ? "✅ Copied!" : "🔗 Copy Link"}
               </button>
 
+              {/* Twitter Share */}
               <a
-                href={`https://twitter.com/intent/tweet?text=Check out my GitHub Wrapped! 🚀&url=${encodeURIComponent(cardUrl)}`}
+                href={`https://twitter.com/intent/tweet?text=Check out my GitHub Wrapped on OSS Growth Tracker! 🚀 @${username}&url=${encodeURIComponent(
+                  "https://oss-growth-tracker.vercel.app"
+                )}`}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="share-action-btn share-twitter-btn"
@@ -139,8 +162,11 @@ const ShareCard = ({ username }) => {
                 🐦 Share on Twitter
               </a>
 
+              {/* LinkedIn Share */}
               <a
-                href={`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(cardUrl)}`}
+                href={`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(
+                  "https://oss-growth-tracker.vercel.app"
+                )}`}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="share-action-btn share-linkedin-btn"
