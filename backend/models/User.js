@@ -1,6 +1,3 @@
-// models/User.js
-// REPLACE existing User.js with this
-
 const mongoose = require("mongoose");
 
 const userSchema = new mongoose.Schema(
@@ -24,6 +21,12 @@ const userSchema = new mongoose.Schema(
     githubUsername: {
       type: String,
       default: "",
+    },
+    // ✅ NEW - Token save hoga
+    githubAccessToken: {
+      type: String,
+      default: "",
+      select: false,
     },
     username: {
       type: String,
@@ -50,8 +53,6 @@ const userSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
-
-    // ✅ NEW: Streak fields
     currentStreak: {
       type: Number,
       default: 0,
@@ -64,8 +65,6 @@ const userSchema = new mongoose.Schema(
       type: Date,
       default: null,
     },
-
-    // ✅ NEW: Score field
     score: {
       type: Number,
       default: 0,
@@ -76,7 +75,6 @@ const userSchema = new mongoose.Schema(
   }
 );
 
-// Badge virtual — commit se calculate hota hai
 userSchema.virtual("badge").get(function () {
   const c = this.totalCommits || 0;
   if (c >= 1000) return { label: "Legend",       emoji: "🏆" };
@@ -88,7 +86,6 @@ userSchema.virtual("badge").get(function () {
   return          { label: "Newcomer",           emoji: "👋" };
 });
 
-// ✅ NEW: Streak badge virtual
 userSchema.virtual("streakBadge").get(function () {
   const s = this.currentStreak || 0;
   if (s >= 30) return { label: "Streak Master", emoji: "🔥" };

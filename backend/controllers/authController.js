@@ -10,7 +10,6 @@ const {
 const { calculateUserStreak } = require("../services/streakService");
 const { calculateScore } = require("../utils/scoreCalculator");
 
-// ─── Helper ─────────────────────────────────────────────
 const formatUser = (user) => ({
   _id: user._id,
   githubId: user.githubId || "",
@@ -31,14 +30,13 @@ const formatUser = (user) => ({
   streakBadge: user.streakBadge,
 });
 
-// ─── REGISTER ───────────────────────────────────────────
 const register = async (req, res) => {
   try {
     const { username, email, password } = req.body;
     if (!username || !email || !password) {
-      return res.status(400).json({ 
-        success: false, 
-        message: "All fields required" 
+      return res.status(400).json({
+        success: false,
+        message: "All fields required",
       });
     }
     const hashedPassword = await bcrypt.hash(password, 10);
@@ -49,59 +47,44 @@ const register = async (req, res) => {
       avatar: `https://api.dicebear.com/7.x/initials/svg?seed=${username}`,
     });
     const token = generateToken(user._id);
-    res.status(201).json({ 
-      success: true, 
-      token, 
-      data: formatUser(user) 
+    res.status(201).json({
+      success: true,
+      token,
+      data: formatUser(user),
     });
   } catch (err) {
-    res.status(500).json({ 
-      success: false, 
-      message: "Register failed" 
-    });
+    res.status(500).json({ success: false, message: "Register failed" });
   }
 };
 
-// ─── LOGIN ──────────────────────────────────────────────
 const login = async (req, res) => {
   try {
     const { email, password } = req.body;
-    const user = await User.findOne({ 
-      email: email.toLowerCase() 
+    const user = await User.findOne({
+      email: email.toLowerCase(),
     }).select("+password");
-    
     if (!user) {
-      return res.status(401).json({ 
-        success: false, 
-        message: "Invalid credentials" 
+      return res.status(401).json({
+        success: false,
+        message: "Invalid credentials",
       });
     }
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
-      return res.status(401).json({ 
-        success: false, 
-        message: "Invalid credentials" 
+      return res.status(401).json({
+        success: false,
+        message: "Invalid credentials",
       });
     }
     const token = generateToken(user._id);
-    res.json({ 
-      success: true, 
-      token, 
-      data: formatUser(user) 
-    });
+    res.json({ success: true, token, data: formatUser(user) });
   } catch (err) {
-    res.status(500).json({ 
-      success: false, 
-      message: "Login failed" 
-    });
+    res.status(500).json({ success: false, message: "Login failed" });
   }
 };
 
-// ─── GitHub Login Start ─────────────────────────────────
 const githubLogin = (req, res) => {
   const redirectUri = `${process.env.BACKEND_URL}/auth/github/callback`;
-
-  // ✅ userId query param se lo
   const userId = req.query.userId || null;
   const stateParam = userId ? `connect_${userId}` : "login";
 
@@ -118,7 +101,6 @@ const githubLogin = (req, res) => {
   res.redirect(url);
 };
 
-// ─── GitHub Callback ────────────────────────────────────
 const githubCallback = async (req, res) => {
   const { code, state } = req.query;
 
@@ -131,7 +113,6 @@ const githubCallback = async (req, res) => {
   }
 
   try {
-    // 1. Exchange code → token
     const tokenRes = await axios.post(
       "https://github.com/login/oauth/access_token",
       {
@@ -144,7 +125,6 @@ const githubCallback = async (req, res) => {
     );
 
     console.log("Token Response:", tokenRes.data);
-
     const accessToken = tokenRes.data.access_token;
 
     if (!accessToken) {
@@ -154,11 +134,9 @@ const githubCallback = async (req, res) => {
       );
     }
 
-    // 2. ✅ GitHub profile - token se fetch hoga
     const ghProfile = await fetchGithubProfile(null, accessToken);
     console.log("✅ GitHub Profile:", ghProfile.login, ghProfile.id);
 
-    // 3. Stats fetch karo
     const [totalCommits, streak] = await Promise.all([
       fetchTotalCommits(ghProfile.login, accessToken),
       calculateUserStreak(ghProfile.login, accessToken),
@@ -170,11 +148,13 @@ const githubCallback = async (req, res) => {
       currentStreak: streak.currentStreak,
     });
 
+    // ✅ githubAccessToken save ho raha hai
     const updateData = {
       githubId: String(ghProfile.id),
       githubUsername: ghProfile.login,
       avatar: ghProfile.avatar_url,
       githubConnected: true,
+      githubAccessToken: accessToken, // ✅ ADDED
       totalRepos: ghProfile.public_repos,
       totalCommits,
       currentStreak: streak.currentStreak,
@@ -184,12 +164,10 @@ const githubCallback = async (req, res) => {
       lastRefreshed: new Date(),
     };
 
-    // ✅ Connect existing app user to GitHub
     if (state && state.startsWith("connect_")) {
       const userId = state.replace("connect_", "");
       console.log("Connecting GitHub to userId:", userId);
 
-      // ✅ Duplicate check - same user ho to allow karo
       const existingOwner = await User.findOne({
         githubId: String(ghProfile.id),
       });
@@ -204,7 +182,6 @@ const githubCallback = async (req, res) => {
         );
       }
 
-      // ✅ Agar pehle se linked tha same user se - update karo
       await User.findByIdAndUpdate(userId, updateData);
       console.log("✅ GitHub connected to userId:", userId);
 
@@ -213,7 +190,6 @@ const githubCallback = async (req, res) => {
       );
     }
 
-    // ─── GitHub se direct login ───────────────────────
     const user = await User.findOneAndUpdate(
       { githubId: String(ghProfile.id) },
       {
@@ -234,7 +210,6 @@ const githubCallback = async (req, res) => {
   }
 };
 
-// ─── Logout ─────────────────────────────────────────────
 const logout = (req, res) => {
   res.clearCookie("token");
   res.json({ success: true });
@@ -246,4 +221,4 @@ module.exports = {
   githubLogin,
   githubCallback,
   logout,
-};
+};  

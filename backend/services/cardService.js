@@ -1,6 +1,3 @@
-// services/cardService.js
-
-const puppeteer = require("puppeteer");
 const cloudinary = require("cloudinary").v2;
 const User = require("../models/User");
 const { fetchUserRepos } = require("./githubService");
@@ -8,10 +5,6 @@ const { generateCardHTML } = require("../utils/htmlTemplate");
 const { getBadgeFromCommits } = require("../utils/scoreCalculator");
 const { Readable } = require("stream");
 
-// ❌ PURANA — top pe config mat karo
-// cloudinary.config({...})
-
-// Top language nikalo
 const getTopLanguage = (repos) => {
   const langCount = {};
   repos.forEach((repo) => {
@@ -23,7 +16,6 @@ const getTopLanguage = (repos) => {
   return Object.entries(langCount).sort((a, b) => b[1] - a[1])[0][0];
 };
 
-// Best month nikalo
 const getBestMonth = (repos) => {
   const monthCount = {};
   repos.forEach((repo) => {
@@ -40,10 +32,10 @@ const getBestMonth = (repos) => {
   return Object.entries(monthCount).sort((a, b) => b[1] - a[1])[0][0];
 };
 
-// HTML → PNG
 const htmlToPng = async (html) => {
   let browser = null;
   try {
+    const puppeteer = require("puppeteer");
     browser = await puppeteer.launch({
       headless: "new",
       args: [
@@ -51,6 +43,8 @@ const htmlToPng = async (html) => {
         "--disable-setuid-sandbox",
         "--disable-dev-shm-usage",
         "--disable-gpu",
+        "--no-zygote",
+        "--single-process",
       ],
     });
 
@@ -66,34 +60,44 @@ const htmlToPng = async (html) => {
     });
 
     return screenshotBuffer;
+  } catch (err) {
+    console.error("[Card] Puppeteer error:", err.message);
+    throw err;
   } finally {
     if (browser) await browser.close();
   }
 };
 
-// PNG → Cloudinary
 const uploadToCloudinary = async (buffer, username) => {
-  // ✅ NAYA — config yahan karo (env load hone ke baad)
-  cloudinary.config({
-    cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-    api_key:    process.env.CLOUDINARY_API_KEY,
-    api_secret: process.env.CLOUDINARY_API_SECRET,
+  const cloudName = process.env.CLOUDINARY_CLOUD_NAME;
+  const apiKey = process.env.CLOUDINARY_API_KEY;
+  const apiSecret = process.env.CLOUDINARY_API_SECRET;
+
+  console.log("[Card] Cloudinary config check:", {
+    cloud_name: cloudName || "MISSING",
+    api_key: apiKey || "MISSING",
+    api_secret: apiSecret ? "SET" : "MISSING",
   });
 
-  // Debug — check karo values aa rahi hain
-  console.log("[Card] Cloudinary config:", {
-    cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-    api_key:    process.env.CLOUDINARY_API_KEY,
-    api_secret: process.env.CLOUDINARY_API_SECRET ? "SET" : "MISSING",
+  if (!cloudName || !apiKey || !apiSecret) {
+    throw new Error(
+      "Cloudinary credentials missing! Check Render environment variables."
+    );
+  }
+
+  cloudinary.config({
+    cloud_name: cloudName,
+    api_key: apiKey,
+    api_secret: apiSecret,
   });
 
   return new Promise((resolve, reject) => {
     const uploadStream = cloudinary.uploader.upload_stream(
       {
-        folder:        "oss-tracker-cards",
-        public_id:     `card_${username}_${Date.now()}`,
+        folder: "oss-tracker-cards",
+        public_id: `card_${username}_${Date.now()}`,
         resource_type: "image",
-        format:        "png",
+        format: "png",
       },
       (error, result) => {
         if (error) {
@@ -105,7 +109,6 @@ const uploadToCloudinary = async (buffer, username) => {
       }
     );
 
-    const { Readable } = require("stream");
     const readable = new Readable();
     readable.push(buffer);
     readable.push(null);
@@ -113,56 +116,65 @@ const uploadToCloudinary = async (buffer, username) => {
   });
 };
 
-// Main function
 const generateCard = async (username) => {
   console.log("[Card] Generating card for:", username);
 
+  // ✅ Token bhi fetch karo
   const user = await User.findOne({
     $or: [
-      { username:       username.toLowerCase() },
+      { username: username.toLowerCase() },
       { githubUsername: username },
     ],
-  });
+  }).select("+githubAccessToken");
 
   if (!user) {
     throw new Error("User not found.");
   }
 
+  console.log("[Card] User found:", user.username);
+  console.log("[Card] GitHub username:", user.githubUsername);
+  console.log("[Card] Token:", user.githubAccessToken ? "YES" : "NO");
+
   let repos = [];
   try {
-    repos = await fetchUserRepos(user.githubUsername || user.username);
+    if (user.githubUsername) {
+      repos = await fetchUserRepos(
+        user.githubUsername,
+        user.githubAccessToken || null // ✅ Token pass karo
+      );
+    }
   } catch (err) {
     console.log("[Card] Could not fetch repos:", err.message);
+    repos = [];
   }
 
   const topLanguage = getTopLanguage(repos);
-  const bestMonth   = getBestMonth(repos);
-  const badge       = getBadgeFromCommits(user.totalCommits || 0);
+  const bestMonth = getBestMonth(repos);
+  const badge = getBadgeFromCommits(user.totalCommits || 0);
 
   const cardData = {
-    username:      user.githubUsername || user.username,
-    avatar:        user.avatar || `https://github.com/${user.githubUsername}.png`,
-    totalCommits:  Number(user.totalCommits  || 0),
+    username: user.githubUsername || user.username,
+    avatar: user.avatar || `https://github.com/${user.githubUsername}.png`,
+    totalCommits: Number(user.totalCommits || 0),
     longestStreak: Number(user.longestStreak || 0),
     currentStreak: Number(user.currentStreak || 0),
-    totalRepos:    Number(user.totalRepos    || 0),
-    score:         Number(user.score         || 0),
+    totalRepos: Number(user.totalRepos || 0),
+    score: Number(user.score || 0),
     topLanguage,
     bestMonth,
     badge,
   };
 
-  console.log("[Card] Card data:", cardData);
+  console.log("[Card] Card data ready:", cardData);
 
-  const html      = generateCardHTML(cardData);
-  console.log("[Card] Generating PNG with Puppeteer...");
+  const html = generateCardHTML(cardData);
+  console.log("[Card] Generating PNG...");
   const pngBuffer = await htmlToPng(html);
 
   console.log("[Card] Uploading to Cloudinary...");
   const cardUrl = await uploadToCloudinary(pngBuffer, cardData.username);
 
-  console.log("[Card] Card URL:", cardUrl);
-
+  console.log("[Card] Done! URL:", cardUrl);
   return { cardUrl, cardData };
 };
 
