@@ -102,22 +102,11 @@ const login = async (req, res) => {
 
 // ─── GitHub Login Start ─────────────────────────────────
 const githubLogin = (req, res) => {
-  // ✅ FIXED - Token se userId nikalo aur state me bhejo
   const redirectUri = `${process.env.BACKEND_URL}/auth/github/callback`;
 
-  // Token se user ID nikalne ki koshish
-  let stateParam = "login";
-  const authHeader = req.headers.authorization;
-  if (authHeader && authHeader.startsWith("Bearer ")) {
-    const token = authHeader.split(" ")[1];
-    try {
-      const jwt = require("jsonwebtoken");
-      const decoded = jwt.verify(token, process.env.JWT_SECRET);
-      stateParam = `connect_${decoded.id}`;
-    } catch (e) {
-      stateParam = "login";
-    }
-  }
+  // ✅ Query param se userId lo jo frontend bhejega
+  const userId = req.query.userId || null;
+  const stateParam = userId ? `connect_${userId}` : "login";
 
   const url =
     `https://github.com/login/oauth/authorize` +
@@ -149,6 +138,11 @@ const githubCallback = async (req, res) => {
       },
       { headers: { Accept: "application/json" } }
     );
+
+    console.log("Token Response:", tokenRes.data);
+console.log("Access Token:", tokenRes.data.access_token);
+console.log("Error:", tokenRes.data.error);
+console.log("Error Description:", tokenRes.data.error_description);
 
     const accessToken = tokenRes.data.access_token;
 
